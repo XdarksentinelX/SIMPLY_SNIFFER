@@ -40,6 +40,79 @@ selected_interface = working_interfaces[user_choice - 1]
 
 
 # =========================
+# SAVE CAPTURE LOCATION
+# =========================
+
+def save_location():
+    print("=" * 40)
+    print("SAVE CAPTURE".center(40))
+    print("=" * 40)
+    print()
+    print("[1] Default location")
+    print("[2] Choose location")
+    print()
+
+    save_capture_choice = int(input("CHOOSE LOCATION YOUR SAVE: "))
+
+    return save_capture_choice
+
+
+save_capture_choice = save_location()
+
+
+if save_capture_choice == 1:
+
+    project_path = os.path.dirname(os.path.abspath(__file__))
+
+    default_path = os.path.join(project_path, "captures")
+
+    os.makedirs(default_path, exist_ok=True)
+
+    save_path = default_path
+
+
+elif save_capture_choice == 2:
+
+    choose_location_path = input("ENTER SAVE PATH: ")
+
+    if os.path.exists(choose_location_path):
+        save_path = choose_location_path
+
+    else:
+        os.makedirs(choose_location_path, exist_ok=True)
+        save_path = choose_location_path
+
+
+# =========================
+# CAPTURE FILE NAME
+# =========================
+
+capture_number = 1
+
+capture_name = f"capture_{capture_number:03d}.pcap"
+
+while os.path.exists(os.path.join(save_path, capture_name)):
+
+    capture_number = capture_number + 1
+
+    capture_name = f"capture_{capture_number:03d}.pcap"
+
+
+capture_file = os.path.join(save_path, capture_name)
+
+
+# =========================
+# PCAP WRITER
+# =========================
+
+pcap_writer = PcapWriter(
+    capture_file,
+    append=False,
+    sync=True
+)
+
+
+# =========================
 # PACKET STATISTICS
 # =========================
 
@@ -52,6 +125,7 @@ other_packets = 0
 
 
 def show_statistics():
+
     print("\033[1;1H", end="")
 
     print("=" * 40)
@@ -71,6 +145,7 @@ def show_statistics():
 
 
 def show_packet(packet):
+
     global packets
     global tcp_packets
     global udp_packets
@@ -79,6 +154,8 @@ def show_packet(packet):
     global other_packets
 
     packets = packets + 1
+
+    pcap_writer.write(packet)
 
     if packet.haslayer(TCP):
         tcp_packets = tcp_packets + 1
@@ -105,13 +182,21 @@ def show_packet(packet):
 clear_terminal()
 
 try:
-    captured = sniff(
+
+    sniff(
         iface=selected_interface,
         prn=show_packet,
-        store=True
+        store=False
     )
 
 except KeyboardInterrupt:
+
+    pass
+
+finally:
+
+    pcap_writer.close()
+
     clear_terminal()
-    wrpcap("capture.pcap", captured)
-    print("Saved: capture.pcap")
+
+    print("Saved:", capture_file)
