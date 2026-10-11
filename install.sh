@@ -4,7 +4,7 @@ set -Eeuo pipefail
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$PROJECT_DIR/.venv"
 MAIN_FILE="$PROJECT_DIR/MAIN.PY"
-LAUNCHER="/usr/local/bin/simply_sniffer"
+LAUNCHER="/usr/bin/simply_sniffer"
 
 echo "Installing SIMPLY_SNIFFER..."
 
@@ -34,14 +34,15 @@ fi
 "$VENV_DIR/bin/python" -m pip install scapy
 
 # Create launcher
+if sudo test -e "$LAUNCHER" && ! sudo grep -Fq "$VENV_DIR/bin/python" "$LAUNCHER"; then
+    echo "Error: $LAUNCHER already exists and does not appear to belong to SIMPLY_SNIFFER." >&2
+    echo "Please inspect the file before replacing it." >&2
+    exit 1
+fi
+
 sudo tee "$LAUNCHER" >/dev/null <<EOF
 #!/usr/bin/env bash
 exec "$VENV_DIR/bin/python" "$MAIN_FILE" "\$@"
 EOF
 
 sudo chmod 755 "$LAUNCHER"
-
-echo
-echo "SIMPLY_SNIFFER installed successfully."
-echo "Run using:"
-echo "  sudo simply_sniffer"
