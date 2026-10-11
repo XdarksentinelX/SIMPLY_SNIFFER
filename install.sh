@@ -47,4 +47,4 @@ echo "SIMPLY_SNIFFER installed successfully."
 echo "Run using:"
 echo "  sudo $LAUNCHER"
 echo
-echo "If 'sudo simply_sniffer' is not found, use the full path above."
+echo "If the command is not found, use the full path shown above."
