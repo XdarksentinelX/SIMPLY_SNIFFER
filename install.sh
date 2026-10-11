@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -45,6 +44,4 @@ sudo chmod 755 "$LAUNCHER"
 echo
 echo "SIMPLY_SNIFFER installed successfully."
 echo "Run using:"
-echo "  sudo $LAUNCHER"
-echo
-echo "If the command is not found, use the full path shown above."
+echo "  sudo simply_sniffer"
